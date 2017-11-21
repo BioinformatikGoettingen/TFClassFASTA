@@ -3,6 +3,7 @@ package de.sybig.TFClassFASTA;
 import com.google.common.base.Charsets;
 
 import de.sybig.TFClassFASTA.api.FastaMarshaller;
+import de.sybig.TFClassFASTA.api.FastaUnmarshaller;
 import de.sybig.TFClassFASTA.core.Fasta;
 import de.sybig.TFClassFASTA.db.FastaDAO;
 import de.sybig.TFClassFASTA.resources.FastaResource;
@@ -10,6 +11,7 @@ import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundleConfiguration;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.forms.MultiPartBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -42,6 +44,7 @@ public class TFClassFASTAApplication extends Application<TFClassFASTAConfigurati
 			}        	
         });
         bootstrap.addBundle(hibernate);
+        bootstrap.addBundle(new MultiPartBundle());
         bootstrap.addBundle(new TemplateConfigBundle(new TemplateConfigBundleConfiguration().charset(Charsets.US_ASCII)));
     }
 
@@ -50,7 +53,9 @@ public class TFClassFASTAApplication extends Application<TFClassFASTAConfigurati
                     final Environment environment) {
         final FastaDAO fastaDAO = new FastaDAO(hibernate.getSessionFactory());
         final FastaMarshaller marshaller = new FastaMarshaller();
+        final FastaUnmarshaller unmarshaller = new FastaUnmarshaller();
         environment.jersey().register(marshaller);
+        environment.jersey().register(unmarshaller);
         environment.jersey().register(new FastaResource(fastaDAO,environment));
     }
 
