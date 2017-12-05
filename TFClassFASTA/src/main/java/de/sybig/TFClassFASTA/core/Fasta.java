@@ -23,7 +23,12 @@ import javax.persistence.NamedQuery;
     @NamedQuery(name = "Fasta.getByALIGNMENT", query = "SELECT fst FROM "
             + "Fasta fst WHERE fst.alignment = :ALIGNMENT "
             + "AND (:TAXON is null OR fst.taxon = :TAXON) "
-            + "AND (:TYPE is null OR fst.type = :TYPE) ")
+            + "AND (:TYPE is null OR fst.type = :TYPE) "),
+    @NamedQuery(name = "Fasta.getByTFCLASS", query = "Select fst FROM "
+    		+ "Fasta fst where fst.alignment = :ALIGNMENT "
+    		+ "And fst.tfclassID = :TFCLASSID "
+    		+ "AND (:TYPE is null OR fst.type = :TYPE) "
+    		+ "AND (:DESC is null OR fst.desc = :DESC) ")
 })
 public class Fasta {
 	
@@ -39,6 +44,8 @@ public class Fasta {
     private String version;
     private String header;
     private String tfclassID;
+    private String source;
+    private String desc;
     
     public Fasta() {
     	
@@ -46,11 +53,23 @@ public class Fasta {
     public Fasta(String header, String seq) {
     	this.header = header;
     	this.sequence = seq;
-    	this.alignment = Alignment.TYP1;
+    	this.alignment = Alignment.Not_Aligned;
     	this.taxon = "Default";
     	this.type = "Default";
     	this.version = "Default";
     	this.tfclassID = "Default";
+    	this.source = "Default";
+    }
+    public Fasta(String header, String seq, String align, String taxon, String type, String tfclassID, String desc, String source) {
+    	this.header = header;
+    	this.sequence = seq;
+    	this.alignment = Alignment.getEnum(align);
+    	this.taxon = taxon;
+    	this.type = type;
+    	this.version = "Default";
+    	this.tfclassID = tfclassID;
+    	this.desc = desc;
+    	this.source = source;  	
     }
     public Long getUID() {
 		return UID;
@@ -116,19 +135,33 @@ public class Fasta {
 		this.tfclassID = tfclassID;
 	}
 
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+	
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+	
 	public enum Alignment{
-    	TYP1, TYP2, TYP3, TYPINVALID;
+    	Phyml, Prank, Not_Aligned;
     	@Override
     	public String toString(){
     	    switch (this) {
-    	    case TYP1:
-    		return "typ1";
-    	    case TYP2:
-    		return "typ2";
-    	    case TYP3:
-    	    return "typ3";
-    	    case TYPINVALID:
-    	    return "invalid";
+    	    case Phyml:
+    		return "Phyml";
+    	    case Prank:
+    	    return "Prank";
+    	    case Not_Aligned:
+    	    return "not aligned";
     	    }
     	    return "";
     	}
@@ -138,7 +171,7 @@ public class Fasta {
     			return Alignment.valueOf(value);
     		}
     		catch(IllegalArgumentException e) {
-    			return TYPINVALID;
+    			return Not_Aligned;
     		}
     	}
     }
