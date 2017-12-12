@@ -17,11 +17,19 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 
 import de.sybig.TFClassFASTA.core.Fasta;
+import de.sybig.TFClassFASTA.core.MetaFile;
+import de.sybig.TFClassFASTA.db.MetaFileDAO;
 
 @Provider
 @Consumes(MediaType.MULTIPART_FORM_DATA)
 public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>>{
 
+	private final MetaFileDAO metafileDAO;
+	
+	public FastaUnmarshaller(MetaFileDAO metafileDAO) {
+		this.metafileDAO = metafileDAO;
+	}
+	
 	@Override
 	public boolean isReadable(Class<?> arg0, Type genericType, Annotation[] annotations, MediaType mediaType) {
 		if(mediaType.getType().equals("multipart") && mediaType.getSubtype().equals("form-data")) {
@@ -37,6 +45,7 @@ public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>>{
 		List<String> fastaFile = new ArrayList<>();
 		BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
 		String line, type, align, desc, tfclassID,source;
+		Long version;
 		line = type = align = desc = tfclassID = source = null;
 		while((line = in.readLine()) != null) {
 			System.out.println(line);
@@ -52,10 +61,6 @@ public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>>{
 				in.readLine();
 				align = in.readLine();
 				break;
-			case "desc":
-				in.readLine();
-				desc = in.readLine();
-				break;	
 			case "tfclassid":
 				in.readLine();
 				tfclassID = in.readLine();
@@ -83,9 +88,16 @@ public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>>{
 		in.close();
 		System.out.println("Type = " + type);
 		System.out.println("Align = " + align);
-		System.out.println("Desc = " + desc);
 		System.out.println("TFClassID = " + tfclassID);
 		System.out.println("Source = " + source);
+		List<MetaFile> metafiles = metafileDAO.getNewestByTFClassID(tfclassID, align, type);
+		if(metafiles.isEmpty()) {
+			version = 1l;
+		}
+		else {
+			version = metafiles.get(0).getVersion()+1;
+		}
+		MetaFile sourcefile = new MetaFile(align, type, tfclassID, source, version);
 		for(int i = 0; i < fastaFile.size();) {
 			String header = fastaFile.get(i);
 			String seq = fastaFile.get(i+1);
@@ -105,7 +117,7 @@ public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>>{
 			System.out.println(i);
 			System.out.println(header);
 			System.out.println(seq);
-			listFasta.add(new Fasta(header, seq, align, taxon, type, tfclassID, desc, source));			
+			listFasta.add(new Fasta(header, seq, sourcefile, taxon));			
 		}
 		return listFasta;
 	}
