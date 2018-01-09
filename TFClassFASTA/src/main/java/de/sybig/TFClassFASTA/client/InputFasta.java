@@ -1,14 +1,20 @@
 package de.sybig.TFClassFASTA.client;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -210,18 +216,26 @@ public class InputFasta
      * @return
      */
     private static File findPROTFile(File dir, String suffix) throws IOException{
-    	Stream<Path> fileStream;
+    	Supplier<Stream<Path>> fileStreamSupplier;
     	Path directory = dir.toPath();
-    	fileStream = Files.find(directory, 0, (p, bfa) -> bfa.isRegularFile() && p.getFileName().endsWith(suffix) && p.getFileName().toString().contains("mammalia") && !p.getFileName().toString().contains("metazoa") && !p.getFileName().toString().contains("vertebrata"));
-    	if(fileStream.count() == 0) {
+    	fileStreamSupplier = () -> {
+			try {
+				return Files.find(directory, 1, (p, bfa) -> bfa.isRegularFile() && p.getFileName().toString().endsWith(suffix) && p.getFileName().toString().contains("mammalia") && !p.getFileName().toString().contains("metazoa") && !p.getFileName().toString().contains("vertebrata"));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());;
+				return null;
+			}
+    	};	
+    	if(fileStreamSupplier.get().count() == 0) {
     		System.out.println("Could not find a *" + suffix + " for " + dir.getName());
     		return null;
     	}
-    	else if(fileStream.count() == 1) {
-    		return fileStream.findFirst().get().toFile();
+    	else if(fileStreamSupplier.get().count() == 1) {
+    		return fileStreamSupplier.get().findFirst().get().toFile();
     	}
     	else {
-    		Map<Boolean, List<Path>> groups = fileStream.collect(Collectors.partitioningBy(p -> (p.getFileName().toString().contains("mammalia") && !p.getFileName().toString().contains("slim"))));
+    		Map<Boolean, List<Path>> groups = fileStreamSupplier.get().collect(Collectors.partitioningBy(p -> (p.getFileName().toString().contains("mammalia") && !p.getFileName().toString().contains("slim"))));
     		List<Path> fileList;
     		if(groups.get(true).size() == 0) { // Using mammalia slim
     			fileList = groups.get(false);
@@ -236,7 +250,7 @@ public class InputFasta
 					try {
 						BasicFileAttributes attr0 = Files.readAttributes(file0, BasicFileAttributes.class);
 						BasicFileAttributes attr1 = Files.readAttributes(file1, BasicFileAttributes.class);
-						return attr0.creationTime().compareTo(attr1.creationTime());
+						return - attr0.creationTime().compareTo(attr1.creationTime());
 					}
 					catch(IOException e) {
 						System.out.println("Error while comparing files");
@@ -254,7 +268,16 @@ public class InputFasta
 			ZipEntry entry = zipFile.getEntry(fileName);
 			InputStream iStream = zipFile.getInputStream(entry);
 			Path tempFile = Files.createTempFile("TFClassTempFile",".tmp");
-			Files.copy(iStream, tempFile);
+			BufferedReader in = new BufferedReader(new InputStreamReader(iStream));
+			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(tempFile.toFile())));
+			String line = null;
+			while((line = in.readLine()) != null) {
+				if(!line.isEmpty()) {
+					out.println(line);
+				}
+			}
+			in.close();
+			out.close();
 			System.out.println("Adding file " + fileName + " to DB");
 			Matcher matcher = pat.matcher(fileName);
 			if(!matcher.find()) {
@@ -272,6 +295,7 @@ public class InputFasta
 			multiPart.field("type", type);
 			multiPart.field("align", align);
 			multiPart.field("tfclassid", tfclassID);
+			multiPart.field("source", fileName);
 			multiPart.bodyPart(filePart);
 			
 			Response response = target.request().post(Entity.entity(multiPart, multiPart.getMediaType()));
@@ -302,6 +326,7 @@ public class InputFasta
 			multiPart.field("type", type);
 			multiPart.field("align", align);
 			multiPart.field("tfclassid", tfclassID);
+			multiPart.field("source", file.getName());
 			multiPart.bodyPart(filePart);
 			
 			Response response = target.request().post(Entity.entity(multiPart, multiPart.getMediaType()));
