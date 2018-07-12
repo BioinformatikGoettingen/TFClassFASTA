@@ -151,6 +151,7 @@ public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>>{
 				if(tfactor.contains("-annot")) {
 					tfactor = tfactor.replace("-annot","");
 				}
+                                tfactor = tfactor.replace("-", "");
 				if(TFactortoID.containsKey(tfactor)) { //Mapping tfactor to id
 					tfactor = TFactortoID.get(tfactor);
 				}
