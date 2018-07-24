@@ -37,7 +37,10 @@ public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>> {
             while ((line = in.readLine()) != null) {
                 String[] strarray = line.split(";");
                 if (strarray.length >= 2) {
-                    tempMap.put(strarray[1].toLowerCase().replace("-", ""), strarray[0]);
+                    String names = strarray[1].toLowerCase().replace("-", "");
+                    for (String name : names.split(" ")) {
+                        tempMap.put(name, strarray[0]);
+                    }
                 }
             }
             in.close();
@@ -143,13 +146,13 @@ public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>> {
                 tfactor = header.substring(taxon.length() + 2);//Starting after Taxon 
                 tfactor = tfactor.replaceAll("[-_.]ma-?[0-9]?_ma-?[0-9]?$", "_ma");
                 tfactor = tfactor.substring(0, tfactor.lastIndexOf("_"));
-                
-                   if (tfactor.endsWith("-DBD")) {//Removing -DBD
+
+                if (tfactor.endsWith("-DBD")) {//Removing -DBD
                     tfactor = tfactor.substring(0, tfactor.length() - 4);
                 }
                 // required for maff ./dbd/dbd_tree/1/1.1_bZIP/1.1.3_Maf-related/1.1.3.2_Small MAF/1.1.3.2_mammalia_dbd_phyml-input.fasta.txt
-               tfactor = tfactor.replaceAll("[-_.]ma-?[0-9]?$","");
-                   
+                tfactor = tfactor.replaceAll("[-_.]ma-?[0-9]?$", "");
+
                 if (tfactor.contains("annot")) {
                     tfactor = tfactor.replaceAll("-?annot[_-]?[0-9]*", "");
                 }
