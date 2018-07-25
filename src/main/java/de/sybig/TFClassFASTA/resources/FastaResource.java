@@ -19,7 +19,7 @@ import de.sybig.TFClassFASTA.db.MetaFileDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.setup.Environment;
 
-@Path("/FASTA")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 public class FastaResource {
 
@@ -33,6 +33,18 @@ public class FastaResource {
 		this.environment = environment;
 	}
 	
+        
+        @GET
+        @Produces("application/fasta, application/json")
+        @Path("{TFCLASSID:(?:(?:[0-9]*)\\.){3}(?:[0-9]?)}/{TYPE: dbd}/{ALIGNMENT: phyml}")
+        @UnitOfWork
+        public List<Fasta> getOrigFile(@PathParam(value = "TFCLASSID") String tfcID,
+			@PathParam(value = "TYPE") String type,
+			@PathParam(value = "ALIGNMENT") String alignment){
+            MetaFile result = metafileDAO.getSingleResult(tfcID, "Phyml", "DBD");
+           return fastaDAO.getByFile(result, null);
+        }
+        
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("/version/{TFCLASSID}/{TYPE}/{ALIGNMENT}")

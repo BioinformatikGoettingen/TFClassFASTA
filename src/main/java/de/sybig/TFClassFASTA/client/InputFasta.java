@@ -264,7 +264,10 @@ public class InputFasta
     }
     private static void addZipFileToDB(File dir, String fileName, String zipName, String type, String align) {
 		try{
-			ZipFile zipFile = new ZipFile(new File(dir, zipName));
+                        if (fileName.contains("slim")){
+                            return;
+                        }
+			ZipFile zipFile = new ZipFile(new File(dir, zipName));                      
 			ZipEntry entry = zipFile.getEntry(fileName);
 			InputStream iStream = zipFile.getInputStream(entry);
 			Path tempFile = Files.createTempFile("TFClassTempFile",".tmp");
@@ -289,7 +292,7 @@ public class InputFasta
 			Client client = ClientBuilder.newBuilder()
 					.register(MultiPartFeature.class)
 					.build();
-			WebTarget target = client.target("http://localhost:8080/FASTA/upload");
+			WebTarget target = client.target("http://localhost:8080/upload");
 			FileDataBodyPart filePart = new FileDataBodyPart("fasta", tempFile.toFile());
 			FormDataMultiPart multiPart = new FormDataMultiPart();
 			multiPart.field("type", type);
@@ -310,6 +313,9 @@ public class InputFasta
     }
     private static void addFileToDB(File file, String type, String align) {
 		try{
+                    if (file.getName().contains("slim")){
+                        return; //FIXME
+                    }
 			System.out.println("Adding file " + file.getName() + " to DB");
 			Matcher matcher = pat.matcher(file.getName());
 			if(!matcher.find()) {
@@ -320,7 +326,7 @@ public class InputFasta
 			Client client = ClientBuilder.newBuilder()
 					.register(MultiPartFeature.class)
 					.build();
-			WebTarget target = client.target("http://localhost:8080/FASTA/upload");
+			WebTarget target = client.target("http://localhost:8080/upload");
 			FileDataBodyPart filePart = new FileDataBodyPart("fasta", file);
 			FormDataMultiPart multiPart = new FormDataMultiPart();
 			multiPart.field("type", type);

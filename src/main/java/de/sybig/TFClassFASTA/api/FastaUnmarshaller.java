@@ -107,10 +107,7 @@ public class FastaUnmarshaller implements MessageBodyReader<List<Fasta>> {
             }
         }
         in.close();
-//		System.out.println("Type = " + type);
-//		System.out.println("Align = " + align);
-//		System.out.println("TFClassID = " + tfclassID);
-//		System.out.println("Source = " + source);
+
         List<MetaFile> metafiles = metafileDAO.getNewestByTFClassID(tfclassID, align, type);
         if (metafiles.isEmpty()) {
             version = 1l;
