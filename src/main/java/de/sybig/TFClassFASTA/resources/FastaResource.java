@@ -36,7 +36,7 @@ public class FastaResource {
         
         @GET
         @Produces("application/fasta, application/json")
-        @Path("{TFCLASSID:(?:(?:[0-9]*)\\.){3}(?:[0-9]?)}/{TYPE: dbd}/{ALIGNMENT: phyml}")
+        @Path("{TFCLASSID:(?:(?:[0-9]*)\\.){2,3}(?:[0-9]?)}/{TYPE: dbd}/{ALIGNMENT: phyml}")
         @UnitOfWork
         public List<Fasta> getOrigFile(@PathParam(value = "TFCLASSID") String tfcID,
 			@PathParam(value = "TYPE") String type,
