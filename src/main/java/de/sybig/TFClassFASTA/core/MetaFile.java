@@ -12,12 +12,13 @@ import javax.persistence.NamedQuery;
 @NamedQueries({
     @NamedQuery(name = "MetaFile.getByTFCLASS", query = "Select file FROM "
             + "MetaFile file where file.alignment = :ALIGNMENT "
-            + "And file.tfclassID = :TFCLASSID "
+            + "AND file.tfclassID = :TFCLASSID "
             + "AND file.type = :TYPE "
             + "AND file.version = :VERSION")
     ,
     @NamedQuery(name = "MetaFile.getNewestByTFCLASS", query = "Select file FROM "
-            + "MetaFile file where file.alignment = :ALIGNMENT "
+            + "MetaFile file "
+            + "WHERE file.alignment = :ALIGNMENT "
             + "AND file.tfclassID = :TFCLASSID "
             + "AND file.type = :TYPE "
             + "ORDER BY file.version DESC")

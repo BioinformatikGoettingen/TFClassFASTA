@@ -18,6 +18,7 @@ import de.sybig.TFClassFASTA.db.FastaDAO;
 import de.sybig.TFClassFASTA.db.MetaFileDAO;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.setup.Environment;
+import javax.ws.rs.core.Response;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,13 +37,30 @@ public class FastaResource {
         
         @GET
         @Produces("application/fasta, application/json")
-        @Path("{TFCLASSID:(?:(?:[0-9]*)\\.){2,3}(?:[0-9]?)}/{TYPE: dbd}/{ALIGNMENT: phyml}")
+        @Path("{TFCLASSID:(?:(?:[0-9]*)\\.){2,3}(?:[0-9]+)}/{TYPE: dbd}/{ALIGNMENT: phyml}")
         @UnitOfWork
-        public List<Fasta> getOrigFile(@PathParam(value = "TFCLASSID") String tfcID,
+        public Response getOrigFile(@PathParam(value = "TFCLASSID") String tfcID,
 			@PathParam(value = "TYPE") String type,
 			@PathParam(value = "ALIGNMENT") String alignment){
-            MetaFile result = metafileDAO.getSingleResult(tfcID, "Phyml", "DBD");
-           return fastaDAO.getByFile(result, null);
+            MetaFile metafile = metafileDAO.getSingleResult(tfcID, "Phyml", "DBD");
+            List<Fasta> result = fastaDAO.getByFile(metafile, null);if (result.isEmpty()){
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            return Response.ok(result).build();
+            
+        }
+        @GET
+        @Produces("application/fasta, application/json")
+        @Path("{TFCLASSID:(?:(?:[0-9]*)\\.){4}(?:[0-9]+)}/{TYPE: dbd}/{ALIGNMENT: phyml}")
+        @UnitOfWork
+        public Response getOrigFileLevel5(@PathParam(value = "TFCLASSID") String tfcID,
+			@PathParam(value = "TYPE") String type,
+			@PathParam(value = "ALIGNMENT") String alignment){
+            List<Fasta> result = fastaDAO.getLevel5(tfcID, "DBD", "PhyML");
+            if (result.isEmpty()){
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+            return Response.ok(result).build();
         }
         
 	@GET

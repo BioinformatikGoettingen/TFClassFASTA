@@ -13,7 +13,12 @@ import javax.persistence.NamedQuery;
 @NamedQueries({
     @NamedQuery(name = "Fasta.getByFile", query = "Select fst FROM "
     		+ "Fasta fst where fst.file = :FILE "
-    		+ "AND (:TAXON is null OR fst.taxon = :TAXON)")
+    		+ "AND (:TAXON is null OR fst.taxon = :TAXON)"),
+    @NamedQuery(name = "Fasta.getLevel5", query = "SELECT fst "
+            + "FROM Fasta fst JOIN fst.file meta "
+            + "WHERE fst.tfactor = :TFCID "
+            + "AND meta.type = :TYPE "
+            + "AND meta.alignment = :ALIGNMENT")
 })
 public class Fasta {
 	
