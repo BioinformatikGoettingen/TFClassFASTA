@@ -30,12 +30,18 @@ public class FastaMarshaller implements MessageBodyWriter<List<Fasta>>{
 	@Override
 	public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
 		if(Collection.class.isAssignableFrom(type)) {
-			ParameterizedType t = (ParameterizedType) genericType;
-			if(t.getActualTypeArguments()[0].equals(Fasta.class)) {
-				return true;
-			}
+//                    System.out.println("-- " + type.toGenericString());
+                    return true;
+                  
+//                        System.out.println("0a " + genericType);
+//			ParameterizedType t = (ParameterizedType) genericType;
+//                          System.out.println("1 " +  t.getActualTypeArguments()[0]);
+//			if(t.getActualTypeArguments()[0].equals(Fasta.class)) {
+//                            System.out.println("2");
+//				return true;
+//			}
 		}
-		return false;
+		return true;
 	}
 	
 	@Override
