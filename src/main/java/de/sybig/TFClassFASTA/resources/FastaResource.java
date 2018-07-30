@@ -57,7 +57,7 @@ public class FastaResource {
     public Response getOrigFileLevel5(@PathParam(value = "TFCLASSID") String tfcID,
             @PathParam(value = "TYPE") String type,
             @PathParam(value = "ALIGNMENT") String alignment) {
-        List<Fasta> result = fastaDAO.getLevel5(tfcID, "DBD", "PhyML");
+        List<Fasta> result = fastaDAO.getLevel5(tfcID, "DBD", "Phyml");
         if (result.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
