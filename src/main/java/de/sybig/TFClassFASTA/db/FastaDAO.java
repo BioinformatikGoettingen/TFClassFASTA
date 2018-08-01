@@ -5,6 +5,7 @@ import org.hibernate.SessionFactory;
 import de.sybig.TFClassFASTA.core.Fasta;
 import de.sybig.TFClassFASTA.core.MetaFile;
 import io.dropwizard.hibernate.AbstractDAO;
+import org.hibernate.query.Query;
 
 public class FastaDAO extends AbstractDAO<Fasta> {
 
@@ -25,6 +26,10 @@ public class FastaDAO extends AbstractDAO<Fasta> {
     }
 
     public List<Fasta> getLevel5(String tfcID, String type, String alignment) {
+//        Query level = namedQuery("Fasta.levels").setParameter("TFCID", tfcID)
+//                .setParameter("TYPE", MetaFile.Type.getEnum(type))
+//                .setParameter("ALIGNMENT", MetaFile.Alignment.getEnum(alignment));
+//        System.out.println("level " + level);
         return list(namedQuery("Fasta.getLevel5")
                 .setParameter("TFCID", tfcID)
                 .setParameter("TYPE", MetaFile.Type.getEnum(type))

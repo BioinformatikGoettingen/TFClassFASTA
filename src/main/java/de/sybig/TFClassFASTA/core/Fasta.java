@@ -18,7 +18,15 @@ import javax.persistence.NamedQuery;
             + "FROM Fasta fst JOIN fst.file meta "
             + "WHERE fst.tfactor = :TFCID "
             + "AND meta.type = :TYPE "
-            + "AND meta.alignment = :ALIGNMENT")
+            + "AND meta.alignment = :ALIGNMENT "
+            + "AND LENGTH(meta.tfclassID) =  (SELECT MAX(LENGTH(meta2.tfclassID)) FROM Fasta fst2 JOIN fst2.file meta2 "
+            + "  WHERE fst2.tfactor = :TFCID "
+            + "  AND meta2.type = :TYPE "
+            + "  AND meta2.alignment = :ALIGNMENT)" ),
+    @NamedQuery(name = "levels", query = "SELECT MAX(LENGTH(meta2.tfclassID)) FROM Fasta fst2 JOIN fst2.file meta2 "
+            + "  WHERE fst2.tfactor = :TFCID "
+            + "  AND meta2.type = :TYPE "
+            + "  AND meta2.alignment = :ALIGNMENT" )
 })
 public class Fasta {
 	
