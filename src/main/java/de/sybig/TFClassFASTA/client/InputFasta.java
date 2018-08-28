@@ -183,9 +183,7 @@ public class InputFasta
     private static void searchPROTTree(File dir) {
     	System.out.println("Adding data in " + dir.getName());
     	File[] subDirs = dir.listFiles(File::isDirectory);
-    	for(File subDir : subDirs) {
-    		searchPROTTree(subDir);
-    	}
+    	
     	File fastaFile =null;
     	try {
     		fastaFile = findPROTFile(dir, ".fasta.txt");
@@ -204,7 +202,12 @@ public class InputFasta
     	    String file = tfclass + "_" + version + "_fasta.input.seq";
     	    String zip = tfclass + ".phyml." + version + ".zip";
     	    addZipFileToDB(dir, file, zip, "Protein", "Phyml");
-    	}	
+    	}
+        if (fastaFile == null){
+            for(File subDir : subDirs) {
+    		searchPROTTree(subDir);
+    	}
+        }
     	   	
     }
     /**
