@@ -57,8 +57,22 @@ public class FastaResource {
     public Response getOrigFileLevel5(@PathParam(value = "TFCLASSID") String tfcID,
             @PathParam(value = "TYPE") String type,
             @PathParam(value = "ALIGNMENT") String alignment) {
-        System.out.println("level 5 for " + tfcID);
+       
         List<Fasta> result = fastaDAO.getLevel5(tfcID, "DBD", "Phyml");
+        if (result.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        return Response.ok(result).build();
+    }
+    @GET
+    @Produces("application/fasta, application/json")
+    @Path("{TFCLASSID:(?:(?:[0-9]*)\\.){4}(?:[0-9]+)}/{TYPE: protein}/{ALIGNMENT: none}")
+    @UnitOfWork
+    public Response getProtLevel5(@PathParam(value = "TFCLASSID") String tfcID,
+            @PathParam(value = "TYPE") String type,
+            @PathParam(value = "ALIGNMENT") String alignment) {
+       
+        List<Fasta> result = fastaDAO.getLevel5(tfcID, "Protein", "Not_Aligned");
         if (result.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
